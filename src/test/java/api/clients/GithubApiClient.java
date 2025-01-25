@@ -34,7 +34,7 @@ public class GithubApiClient extends ApiClient {
     private String repoName;
 
     public GithubApiClient() {
-        super(EnvUtils.getEnv("GITHUB_BASE_URL"), EnvUtils.getEnv("GITHUB_API_KEY"));
+        super(EnvUtils.getEnv("GITHUB_BASE_URL"), EnvUtils.getEnv("GITHUB_TOKEN"));
         this.repoOwner = EnvUtils.getEnv("GITHUB_REPO_OWNER");
         this.repoName = EnvUtils.getEnv("GITHUB_REPO_NAME");
     }
