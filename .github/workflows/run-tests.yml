@@ -16,3 +16,5 @@ jobs:
         cache: maven
     - name: Run tests with maven
       run: mvn test
+      env:
+        TEST_GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
