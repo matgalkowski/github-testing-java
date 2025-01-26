@@ -11,5 +11,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GithubUpdatePrRequest extends GithubPr implements ApiRequest {
-    private String state;
+  private String state;
 }

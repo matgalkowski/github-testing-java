@@ -6,7 +6,7 @@ import lombok.Getter;
 /** Enum representing the state of a pull request */
 @AllArgsConstructor
 @Getter
-public enum IssueStates {
+public enum IssueState {
   OPEN("open"),
   CLOSED("closed");
 

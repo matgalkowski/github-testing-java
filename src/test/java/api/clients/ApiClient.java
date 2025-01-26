@@ -2,17 +2,17 @@ package api.clients;
 
 import static io.restassured.RestAssured.*;
 
-import api.enums.HttpMethods;
 import api.models.ApiRequest;
 import api.utils.EnvUtils;
 import io.restassured.filter.log.ErrorLoggingFilter;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.Method;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
 /**
- * Abstract base class that should be inherited by all API clients Contains basic methods used for
+ * Abstract base class that should be inherited by all API clients. Contains basic methods used for
  * communicating with external api
  */
 public abstract class ApiClient {
@@ -34,7 +34,7 @@ public abstract class ApiClient {
    * @param path the path of the request
    * @return the response of the request
    */
-  public Response sendRequest(RequestSpecification reqSpec, HttpMethods method, String path) {
+  public Response sendRequest(RequestSpecification reqSpec, Method method, String path) {
     reqSpec.baseUri(this.baseUrl);
     if (this.debugModeEnabled.equals("true")) {
       reqSpec.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
@@ -42,7 +42,7 @@ public abstract class ApiClient {
       reqSpec.filters(new ErrorLoggingFilter());
     }
     reqSpec.header("Authorization", "Bearer " + this.apiKey);
-    return reqSpec.request(method.getValue(), path);
+    return reqSpec.request(method, path);
   }
 
   /**
@@ -52,7 +52,7 @@ public abstract class ApiClient {
    * @param path the path of the request
    * @return the response of the request
    */
-  public Response sendRequest(HttpMethods method, String path) {
+  public Response sendRequest(Method method, String path) {
     RequestSpecification reqSpec = given();
     return this.sendRequest(reqSpec, method, path);
   }
@@ -66,7 +66,7 @@ public abstract class ApiClient {
    * @param body the body of the request
    * @return the response of the request
    */
-  public <T extends ApiRequest> Response sendRequest(HttpMethods method, String path, T body) {
+  public <T extends ApiRequest> Response sendRequest(Method method, String path, T body) {
     RequestSpecification reqSpec = given().body(body);
     return this.sendRequest(reqSpec, method, path);
   }

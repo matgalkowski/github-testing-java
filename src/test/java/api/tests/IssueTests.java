@@ -3,7 +3,7 @@ package api.tests;
 import static org.hamcrest.Matchers.equalTo;
 
 import api.clients.GithubApiClient;
-import api.enums.IssueStates;
+import api.enums.IssueState;
 import api.models.github.requests.GithubCreateIssueRequest;
 import org.testng.annotations.*;
 
@@ -28,11 +28,11 @@ public class IssueTests {
         .getIssue(issueNumber)
         .then()
         .statusCode(200)
-        .body("state", equalTo(IssueStates.OPEN.getValue()));
+        .body("state", equalTo(IssueState.OPEN.getValue()));
   }
 
   @AfterMethod(alwaysRun = true)
   public void afterMethod() {
-    githubApiClient.updateIssueState(issueNumber, IssueStates.CLOSED).then().statusCode(200);
+    githubApiClient.updateIssueState(issueNumber, IssueState.CLOSED).then().statusCode(200);
   }
 }

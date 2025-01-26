@@ -6,7 +6,7 @@ import lombok.Getter;
 /** Enum representing the status of a workflow run in Github actions */
 @AllArgsConstructor
 @Getter
-public enum WorkflowStatuses {
+public enum WorkflowStatus {
   COMPLETED("completed"),
   QUEUED("queued"),
   IN_PROGRESS("in_progress");

@@ -1,14 +1,12 @@
 package api.clients;
 
-
-
-import api.enums.HttpMethods;
-import api.enums.IssueStates;
-import api.enums.TreeModes;
-import api.enums.TreeTypes;
+import api.enums.IssueState;
+import api.enums.TreeMode;
+import api.enums.TreeType;
 import api.models.github.*;
 import api.models.github.requests.*;
 import api.utils.EnvUtils;
+import io.restassured.http.Method;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
@@ -28,7 +26,7 @@ public class GithubApiClient extends ApiClient {
   }
 
   @Override
-  public Response sendRequest(RequestSpecification reqSpec, HttpMethods method, String path) {
+  public Response sendRequest(RequestSpecification reqSpec, Method method, String path) {
     reqSpec.header("Accept", "application/vnd.github+json");
     reqSpec.header("X-Github-Api-Version", "2022-11-28");
     return super.sendRequest(reqSpec, method, path);
@@ -42,7 +40,7 @@ public class GithubApiClient extends ApiClient {
    */
   public Response createRepository(GithubCreateRepoRequest request) {
     String fullPath = "/user/repos";
-    return sendRequest(HttpMethods.POST, fullPath, request);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -53,7 +51,7 @@ public class GithubApiClient extends ApiClient {
    */
   public Response deleteRepository(String repoName) {
     String fullPath = "/repos/%s/%s".formatted(this.repoOwner, repoName);
-    return sendRequest(HttpMethods.DELETE, fullPath);
+    return sendRequest(Method.DELETE, fullPath);
   }
 
   /**
@@ -64,18 +62,18 @@ public class GithubApiClient extends ApiClient {
    */
   public Response getRepository(String repoName) {
     String fullPath = "/repos/%s/%s".formatted(this.repoOwner, repoName);
-    return sendRequest(HttpMethods.GET, fullPath);
+    return sendRequest(Method.GET, fullPath);
   }
 
   /**
    * Creates a pull request
    *
-   * @param createPrDto GithubCreatePrRequest
+   * @param request GithubCreatePrRequest
    * @return the response of the request
    */
-  public Response createPullRequest(GithubCreatePrRequest createPrDto) {
+  public Response createPullRequest(GithubCreatePrRequest request) {
     String fullPath = "/repos/%s/%s/pulls".formatted(this.repoOwner, this.repoName);
-    return sendRequest(HttpMethods.POST, fullPath, createPrDto);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -86,7 +84,7 @@ public class GithubApiClient extends ApiClient {
    */
   public Response getPullRequest(int prNumber) {
     String fullPath = "/repos/%s/%s/pulls/%s".formatted(this.repoOwner, this.repoName, prNumber);
-    return sendRequest(HttpMethods.GET, fullPath);
+    return sendRequest(Method.GET, fullPath);
   }
 
   /**
@@ -96,21 +94,21 @@ public class GithubApiClient extends ApiClient {
    * @param state new state of the pull request
    * @return the response of the request
    */
-  public Response updatePullRequestState(int prNumber, IssueStates state) {
+  public Response updatePullRequestState(int prNumber, IssueState state) {
     String fullPath = "/repos/%s/%s/pulls/%s".formatted(this.repoOwner, this.repoName, prNumber);
     GithubUpdatePrRequest body = GithubUpdatePrRequest.builder().state(state.getValue()).build();
-    return sendRequest(HttpMethods.PATCH, fullPath, body);
+    return sendRequest(Method.PATCH, fullPath, body);
   }
 
   /**
    * Creates a branch
    *
-   * @param createBranchRequest GithubCreateBranchRequest
+   * @param request GithubCreateBranchRequest
    * @return the response of the request
    */
-  public Response createBranch(GithubCreateBranchRequest createBranchRequest) {
+  public Response createBranch(GithubCreateBranchRequest request) {
     String fullPath = "/repos/%s/%s/git/refs".formatted(this.repoOwner, this.repoName);
-    return sendRequest(HttpMethods.POST, fullPath, createBranchRequest);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -122,7 +120,7 @@ public class GithubApiClient extends ApiClient {
   public Response getBranch(String branchName) {
     String fullPath =
         "/repos/%s/%s/branches/%s".formatted(this.repoOwner, this.repoName, branchName);
-    return sendRequest(HttpMethods.GET, fullPath);
+    return sendRequest(Method.GET, fullPath);
   }
 
   /**
@@ -134,31 +132,30 @@ public class GithubApiClient extends ApiClient {
   public Response deleteBranch(String branchName) {
     String fullPath =
         "/repos/%s/%s/git/refs/heads/%s".formatted(this.repoOwner, this.repoName, branchName);
-    return sendRequest(HttpMethods.DELETE, fullPath);
+    return sendRequest(Method.DELETE, fullPath);
   }
 
   /**
    * Updates a branch reference
    *
    * @param branchRef the reference of the branch
-   * @param updateReferenceRequest GithubUpdateReferenceRequest
+   * @param request GithubUpdateReferenceRequest
    * @return the response of the request
    */
-  public Response updateBranchRef(
-      String branchRef, GithubUpdateReferenceRequest updateReferenceRequest) {
+  public Response updateBranchRef(String branchRef, GithubUpdateReferenceRequest request) {
     String fullPath = "/repos/%s/%s/git/%s".formatted(this.repoOwner, this.repoName, branchRef);
-    return sendRequest(HttpMethods.PATCH, fullPath, updateReferenceRequest);
+    return sendRequest(Method.PATCH, fullPath, request);
   }
 
   /**
    * Creates a tree
    *
-   * @param createTreeRequest GithubCreateTreeRequest
+   * @param request GithubCreateTreeRequest
    * @return the response of the request
    */
-  public Response createTree(GithubCreateTreeRequest createTreeRequest) {
+  public Response createTree(GithubCreateTreeRequest request) {
     String fullPath = "/repos/%s/%s/git/trees".formatted(this.repoOwner, this.repoName);
-    return sendRequest(HttpMethods.POST, fullPath, createTreeRequest);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -173,8 +170,8 @@ public class GithubApiClient extends ApiClient {
     GithubTree treeItem =
         GithubTree.builder()
             .path(filePath)
-            .mode(TreeModes.NORMAL_BLOB.getValue())
-            .type(TreeTypes.BLOB.getValue())
+            .mode(TreeMode.NORMAL_BLOB.getValue())
+            .type(TreeType.BLOB.getValue())
             .content(content)
             .build();
     GithubCreateTreeRequest createTreeRequest =
@@ -185,12 +182,12 @@ public class GithubApiClient extends ApiClient {
   /**
    * Creates a commit
    *
-   * @param createCommitRequest GithubCreateCommitRequest
+   * @param request GithubCreateCommitRequest
    * @return the response of the request
    */
-  public Response createCommit(GithubCreateCommitRequest createCommitRequest) {
+  public Response createCommit(GithubCreateCommitRequest request) {
     String fullPath = "/repos/%s/%s/git/commits".formatted(this.repoOwner, this.repoName);
-    return sendRequest(HttpMethods.POST, fullPath, createCommitRequest);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -204,7 +201,7 @@ public class GithubApiClient extends ApiClient {
     String fullPath =
         "/repos/%s/%s/actions/workflows/%s/dispatches"
             .formatted(this.repoOwner, this.repoName, workflowId);
-    return sendRequest(HttpMethods.POST, fullPath, request);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -217,7 +214,7 @@ public class GithubApiClient extends ApiClient {
     String fullPath =
         "/repos/%s/%s/actions/workflows/%s/runs"
             .formatted(this.repoOwner, this.repoName, workflowId);
-    return sendRequest(HttpMethods.GET, fullPath);
+    return sendRequest(Method.GET, fullPath);
   }
 
   /**
@@ -229,7 +226,7 @@ public class GithubApiClient extends ApiClient {
   public Response getWorkflowRun(String runId) {
     String fullPath =
         "/repos/%s/%s/actions/runs/%s".formatted(this.repoOwner, this.repoName, runId);
-    return sendRequest(HttpMethods.GET, fullPath);
+    return sendRequest(Method.GET, fullPath);
   }
 
   /**
@@ -241,18 +238,18 @@ public class GithubApiClient extends ApiClient {
   public Response deleteWorkflowRun(String runId) {
     String fullPath =
         "/repos/%s/%s/actions/runs/%s".formatted(this.repoOwner, this.repoName, runId);
-    return sendRequest(HttpMethods.DELETE, fullPath);
+    return sendRequest(Method.DELETE, fullPath);
   }
 
   /**
    * Creates an issue
    *
-   * @param createIssueRequest the request body
+   * @param request the request body
    * @return the response of the request
    */
-  public Response createIssue(GithubCreateIssueRequest createIssueRequest) {
+  public Response createIssue(GithubCreateIssueRequest request) {
     String fullPath = "/repos/%s/%s/issues".formatted(this.repoOwner, this.repoName);
-    return sendRequest(HttpMethods.POST, fullPath, createIssueRequest);
+    return sendRequest(Method.POST, fullPath, request);
   }
 
   /**
@@ -264,7 +261,7 @@ public class GithubApiClient extends ApiClient {
   public Response getIssue(int issueNumber) {
     String fullPath =
         "/repos/%s/%s/issues/%s".formatted(this.repoOwner, this.repoName, issueNumber);
-    return sendRequest(HttpMethods.GET, fullPath);
+    return sendRequest(Method.GET, fullPath);
   }
 
   /**
@@ -274,11 +271,11 @@ public class GithubApiClient extends ApiClient {
    * @param state new state of the issue
    * @return the response of the request
    */
-  public Response updateIssueState(int issueNumber, IssueStates state) {
+  public Response updateIssueState(int issueNumber, IssueState state) {
     String fullPath =
         "/repos/%s/%s/issues/%s".formatted(this.repoOwner, this.repoName, issueNumber);
     GithubUpdateIssueRequest body =
         GithubUpdateIssueRequest.builder().state(state.getValue()).build();
-    return sendRequest(HttpMethods.PATCH, fullPath, body);
+    return sendRequest(Method.PATCH, fullPath, body);
   }
 }

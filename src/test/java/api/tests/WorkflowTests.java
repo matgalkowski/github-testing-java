@@ -5,7 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 import api.clients.GithubApiClient;
-import api.enums.WorkflowStatuses;
+import api.enums.WorkflowStatus;
 import api.models.github.GithubWorkflowRun;
 import api.models.github.requests.GithubTriggerWorkflowRequest;
 import java.time.Duration;
@@ -14,8 +14,8 @@ import java.util.List;
 import org.testng.annotations.*;
 
 public class WorkflowTests {
-  public static final String BASE_BRANCH_NAME = "main";
-  public static final String TEST_WORKFLOW_FILE_NAME = "sample-workflow.yml";
+  private static final String BASE_BRANCH_NAME = "main";
+  private static final String TEST_WORKFLOW_FILE_NAME = "sample-workflow.yml";
   private final GithubApiClient githubApiClient = new GithubApiClient();
   private int initialRunsCount;
 
@@ -51,13 +51,14 @@ public class WorkflowTests {
     GithubWorkflowRun latestRun = getLatestRun(workflowRuns);
 
     await()
-        .atMost(Duration.ofSeconds(60))
+        .atMost(Duration.ofMinutes(1))
         .pollDelay(Duration.ofSeconds(5))
         .pollInterval(Duration.ofSeconds(3))
         .untilAsserted(
             () ->
                 assertThat(
-                    getRunStatus(latestRun.getId()), equalTo(WorkflowStatuses.COMPLETED.getValue())));
+                    getRunStatus(latestRun.getId()),
+                    equalTo(WorkflowStatus.COMPLETED.getValue())));
 
     githubApiClient.deleteWorkflowRun(latestRun.getId()).then().statusCode(204);
   }

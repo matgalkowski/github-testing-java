@@ -16,6 +16,7 @@ import lombok.Singular;
 @Getter
 public class GithubCreateTreeRequest implements ApiRequest {
   private String baseTree;
+
   @JsonProperty("tree")
   @Singular
   private List<GithubTree> trees;

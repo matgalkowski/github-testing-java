@@ -6,7 +6,7 @@ import lombok.Getter;
 /** Enum representing the type of file in a git tree */
 @AllArgsConstructor
 @Getter
-public enum TreeTypes {
+public enum TreeType {
   BLOB("blob"),
   TREE("tree"),
   COMMIT("commit");

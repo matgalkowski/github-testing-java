@@ -1,0 +1,22 @@
+<suite name="Github API tests">
+    <test name="PullRequests">
+        <classes>
+            <class name="api.tests.PullRequestTests"/>
+        </classes>
+    </test>
+    <test name="Issues">
+        <classes>
+            <class name="api.tests.IssueTests"/>
+        </classes>
+    </test>
+    <test name="Workflows">
+        <classes>
+            <class name="api.tests.WorkflowTests"/>
+        </classes>
+    </test>
+    <test name="Repositories">
+            <classes>
+                <class name="api.tests.RepositoryTests"/>
+            </classes>
+    </test>
+</suite>

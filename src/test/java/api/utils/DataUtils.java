@@ -19,13 +19,13 @@ public class DataUtils {
     int length =
         lengthRange.getMinimum()
             + random.nextInt(lengthRange.getMaximum() - lengthRange.getMinimum() + 1);
-    StringBuilder randomString = new StringBuilder(length);
+    StringBuilder stringBuilder = new StringBuilder(length);
 
     for (int i = 0; i < length; i++) {
       int index = random.nextInt(characters.length());
-      randomString.append(characters.charAt(index));
+      stringBuilder.append(characters.charAt(index));
     }
 
-    return randomString.toString();
+    return stringBuilder.toString();
   }
 }

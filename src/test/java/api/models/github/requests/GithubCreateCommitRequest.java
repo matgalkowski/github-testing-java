@@ -13,10 +13,4 @@ public class GithubCreateCommitRequest implements ApiRequest {
   private String message;
   private String tree;
   @Singular private List<String> parents;
-
-  public GithubCreateCommitRequest(String message, String tree, List<String> parents) {
-    this.message = message;
-    this.tree = tree;
-    this.parents = parents;
-  }
 }

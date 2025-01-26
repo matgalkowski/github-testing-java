@@ -3,7 +3,7 @@ package api.tests;
 import static org.hamcrest.Matchers.*;
 
 import api.clients.GithubApiClient;
-import api.enums.IssueStates;
+import api.enums.IssueState;
 import api.models.github.requests.GithubCreateBranchRequest;
 import api.models.github.requests.GithubCreateCommitRequest;
 import api.models.github.requests.GithubCreatePrRequest;
@@ -13,8 +13,7 @@ import org.apache.commons.lang3.Range;
 import org.testng.annotations.*;
 
 public class PullRequestTests {
-
-  public static final String BASE_BRANCH_NAME = "main";
+  private static final String BASE_BRANCH_NAME = "main";
   private final GithubApiClient githubApiClient = new GithubApiClient();
   private String newBranchName;
   private int newPrNumber;
@@ -22,7 +21,7 @@ public class PullRequestTests {
   @BeforeMethod(alwaysRun = true)
   public void beforeMethod() {
     newBranchName = DataUtils.generateRandomString(Range.between(5, 15));
-    String fileName = DataUtils.generateRandomString(Range.between(5, 15)) + ".txt";
+    final String fileName = DataUtils.generateRandomString(Range.between(5, 15)) + ".txt";
 
     // Get latest commit in the repo
     String latestCommitSha =
@@ -105,12 +104,12 @@ public class PullRequestTests {
         .getPullRequest(newPrNumber)
         .then()
         .statusCode(200)
-        .body("state", equalTo(IssueStates.OPEN.getValue()));
+        .body("state", equalTo(IssueState.OPEN.getValue()));
   }
 
   @AfterMethod(alwaysRun = true)
   public void afterMethod() {
-    githubApiClient.updatePullRequestState(newPrNumber, IssueStates.CLOSED).then().statusCode(200);
+    githubApiClient.updatePullRequestState(newPrNumber, IssueState.CLOSED).then().statusCode(200);
     githubApiClient.deleteBranch(newBranchName).then().statusCode(204);
   }
 }
