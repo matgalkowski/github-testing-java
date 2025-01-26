@@ -1,7 +1,4 @@
 package api.models;
 
-/**
- * Base class for all API request models
- */
-public abstract class ApiRequest {
-}
+/** Interface used by all request models to distinguish them from other Objects */
+public interface ApiRequest {}
