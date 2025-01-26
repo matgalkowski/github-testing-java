@@ -1,71 +1,86 @@
 package api.tests;
 
-import java.time.Duration;
-import java.util.Comparator;
-import java.util.List;
-
-import org.testng.annotations.*;
+import static org.awaitility.Awaitility.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 import api.clients.GithubApiClient;
 import api.enums.WorkflowStatus;
-import api.models.github.GithubTriggerWorkflowRequest;
-import api.models.github.WorkflowRun;
-import api.utils.TestData;
-
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.awaitility.Awaitility.*;
+import api.models.github.GithubWorkflowRun;
+import api.models.github.requests.GithubTriggerWorkflowRequest;
+import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
+import org.testng.annotations.*;
 
 public class WorkflowTests {
-        private GithubApiClient githubApiClient = new GithubApiClient();
-        private int initialRunsCount;
+  private static final String BASE_BRANCH_NAME = "main";
+  private static final String TEST_WORKFLOW_FILE_NAME = "sample-workflow.yml";
+  private final GithubApiClient githubApiClient = new GithubApiClient();
+  private int initialRunsCount;
 
-        @BeforeMethod(alwaysRun = true)
-        public void beforeMethod() {
-                initialRunsCount = getRunsCount();
-        }
+  @BeforeMethod(alwaysRun = true)
+  public void beforeMethod() {
+    initialRunsCount = getRunsCount();
+  }
 
-        @Test(groups = { "workflow" })
-        public void shouldTriggerWorkflow() {
-                GithubTriggerWorkflowRequest triggerWorkflowRequest = new GithubTriggerWorkflowRequest(
-                                TestData.BASE_BRANCH_NAME);
-                githubApiClient.triggerWorkflow(triggerWorkflowRequest, TestData.TEST_WORKFLOW_FILE_NAME)
-                                .then().statusCode(204);
+  @Test(groups = {"workflow"})
+  public void shouldTriggerWorkflow() {
+    GithubTriggerWorkflowRequest triggerWorkflowRequest =
+        GithubTriggerWorkflowRequest.builder().ref(BASE_BRANCH_NAME).build();
+    githubApiClient
+        .triggerWorkflow(triggerWorkflowRequest, TEST_WORKFLOW_FILE_NAME)
+        .then()
+        .statusCode(204);
 
-                await().atMost(Duration.ofSeconds(10))
-                                .pollInterval(Duration.ofSeconds(1))
-                                .untilAsserted(() -> assertThat(getRunsCount(), equalTo(initialRunsCount + 1)));
-        }
+    await()
+        .atMost(Duration.ofSeconds(10))
+        .pollInterval(Duration.ofSeconds(1))
+        .untilAsserted(() -> assertThat(getRunsCount(), equalTo(initialRunsCount + 1)));
+  }
 
-        @AfterMethod(alwaysRun = true)
-        public void afterMethod() {
-                List<WorkflowRun> workflowRuns = githubApiClient.getWorkflowRuns(TestData.TEST_WORKFLOW_FILE_NAME)
-                                .then().extract().jsonPath().getList("workflow_runs", WorkflowRun.class);
-                WorkflowRun latestRun = getLatestRun(workflowRuns);
+  @AfterMethod(alwaysRun = true)
+  public void afterMethod() {
+    List<GithubWorkflowRun> workflowRuns =
+        githubApiClient
+            .getWorkflowRuns(TEST_WORKFLOW_FILE_NAME)
+            .then()
+            .extract()
+            .jsonPath()
+            .getList("workflow_runs", GithubWorkflowRun.class);
+    GithubWorkflowRun latestRun = getLatestRun(workflowRuns);
 
-                await().atMost(Duration.ofSeconds(60))
-                                .pollDelay(Duration.ofSeconds(5))
-                                .pollInterval(Duration.ofSeconds(3))
-                                .untilAsserted(() -> assertThat(
-                                                getRunStatus(latestRun.id), equalTo(WorkflowStatus.completed)));
+    await()
+        .atMost(Duration.ofMinutes(1))
+        .pollDelay(Duration.ofSeconds(5))
+        .pollInterval(Duration.ofSeconds(3))
+        .untilAsserted(
+            () ->
+                assertThat(
+                    getRunStatus(latestRun.getId()),
+                    equalTo(WorkflowStatus.COMPLETED.getValue())));
 
-                githubApiClient.deleteWorkflowRun(latestRun.id)
-                                .then().statusCode(204);
-        }
+    githubApiClient.deleteWorkflowRun(latestRun.getId()).then().statusCode(204);
+  }
 
-        private int getRunsCount() {
-                return githubApiClient.getWorkflowRuns(TestData.TEST_WORKFLOW_FILE_NAME)
-                                .then().statusCode(200)
-                                .extract().jsonPath().getList("workflow_runs").size();
-        }
+  private int getRunsCount() {
+    return githubApiClient
+        .getWorkflowRuns(TEST_WORKFLOW_FILE_NAME)
+        .then()
+        .statusCode(200)
+        .extract()
+        .jsonPath()
+        .getList("workflow_runs")
+        .size();
+  }
 
-        private WorkflowStatus getRunStatus(String runId) {
-                String status = githubApiClient.getWorkflowRun(runId).as(WorkflowRun.class).status;
-                return WorkflowStatus.valueOf(status);
-        }
+  private String getRunStatus(String runId) {
+    return githubApiClient.getWorkflowRun(runId).as(GithubWorkflowRun.class).getStatus();
+  }
 
-        private WorkflowRun getLatestRun(List<WorkflowRun> workflowRuns) {
-                return workflowRuns.stream().max(Comparator.comparingInt(run -> run.runNumber))
-                                .orElseThrow(() -> new RuntimeException("No workflow runs found"));
-        }
+  private GithubWorkflowRun getLatestRun(List<GithubWorkflowRun> workflowRuns) {
+    return workflowRuns.stream()
+        .max(Comparator.comparingInt(GithubWorkflowRun::getRunNumber))
+        .orElseThrow(() -> new RuntimeException("No workflow runs found"));
+  }
 }

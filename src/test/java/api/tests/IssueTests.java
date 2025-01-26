@@ -2,31 +2,37 @@ package api.tests;
 
 import static org.hamcrest.Matchers.equalTo;
 
-import org.testng.annotations.*;
-
 import api.clients.GithubApiClient;
 import api.enums.IssueState;
-import api.models.github.GithubCreateIssueRequest;
+import api.models.github.requests.GithubCreateIssueRequest;
+import org.testng.annotations.*;
 
 public class IssueTests {
-    private GithubApiClient githubApiClient = new GithubApiClient();
-    private int issueNumber;
+  private final GithubApiClient githubApiClient = new GithubApiClient();
+  private int issueNumber;
 
-    @Test(groups = { "issue" })
-    public void shouldCreateIssue() {
-        GithubCreateIssueRequest createIssueRequest = new GithubCreateIssueRequest("Bug report");
-        issueNumber = githubApiClient.createIssue(createIssueRequest)
-                .then().statusCode(201)
-                .extract().jsonPath().getInt("number");
+  @Test(groups = {"issue"})
+  public void shouldCreateIssue() {
+    GithubCreateIssueRequest createIssueRequest =
+        GithubCreateIssueRequest.builder().title("Bug report").build();
+    issueNumber =
+        githubApiClient
+            .createIssue(createIssueRequest)
+            .then()
+            .statusCode(201)
+            .extract()
+            .jsonPath()
+            .getInt("number");
 
-        githubApiClient.getIssue(issueNumber)
-                .then().statusCode(200)
-                .body("state", equalTo(IssueState.open.name()));
-    }
+    githubApiClient
+        .getIssue(issueNumber)
+        .then()
+        .statusCode(200)
+        .body("state", equalTo(IssueState.OPEN.getValue()));
+  }
 
-    @AfterMethod(alwaysRun = true)
-    public void afterMethod() {
-        githubApiClient.updateIssueState(issueNumber, IssueState.closed)
-                .then().statusCode(200);
-    }
+  @AfterMethod(alwaysRun = true)
+  public void afterMethod() {
+    githubApiClient.updateIssueState(issueNumber, IssueState.CLOSED).then().statusCode(200);
+  }
 }
